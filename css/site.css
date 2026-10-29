@@ -1,0 +1,221 @@
+:root {
+  --bg: #f4f1ea;
+  --bg-raised: #fffdf8;
+  --ink: #1c1916;
+  --muted: #5c574f;
+  --line: #d8d2c6;
+  --accent: #1f4d4a;
+  --accent-hover: #163835;
+  --max: 40rem;
+  --wide: 56rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--bg);
+  font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+a {
+  color: var(--accent);
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+.wrap {
+  width: min(var(--wide), calc(100% - 2.5rem));
+  margin: 0 auto;
+}
+
+.narrow {
+  width: min(var(--max), calc(100% - 2.5rem));
+  margin: 0 auto;
+}
+
+header.site {
+  border-bottom: 1px solid var(--line);
+}
+
+header.site .bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 0;
+}
+
+.wordmark {
+  color: inherit;
+  text-decoration: none;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.wordmark span {
+  color: var(--accent);
+}
+
+nav.site {
+  display: flex;
+  gap: 1.25rem;
+  font-size: 0.95rem;
+}
+
+nav.site a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+nav.site a:hover,
+nav.site a[aria-current="page"] {
+  color: var(--ink);
+}
+
+.hero {
+  padding: 4.5rem 0 3.25rem;
+}
+
+.hero p.kicker {
+  margin: 0 0 0.75rem;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+h1 {
+  margin: 0 0 1rem;
+  font-size: clamp(2rem, 5vw, 3.1rem);
+  font-weight: 650;
+}
+
+h2 {
+  margin: 0 0 0.85rem;
+  font-size: 1.45rem;
+}
+
+h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1.05rem;
+}
+
+.lede {
+  max-width: 34rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.15rem;
+}
+
+section {
+  padding: 0 0 3.25rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  padding: 1.25rem 1.3rem 1.35rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+}
+
+.card p,
+.note p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.note {
+  padding: 1.25rem 1.3rem;
+  border: 1px solid var(--line);
+  background: var(--bg-raised);
+}
+
+.note h2,
+.note h3 {
+  margin-bottom: 0.4rem;
+}
+
+.note p + p {
+  margin-top: 0.75rem;
+}
+
+.legal {
+  padding: 2.5rem 0 4rem;
+}
+
+.legal h1 {
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+}
+
+.legal .meta {
+  margin: 0 0 2rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.legal h2 {
+  margin-top: 2rem;
+}
+
+.legal p,
+.legal li {
+  color: #3b3833;
+}
+
+.legal ul {
+  padding-left: 1.2rem;
+}
+
+footer.site {
+  padding: 2rem 0 2.5rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+footer.site .bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+}
+
+footer.site a {
+  color: inherit;
+}
+
+@media (max-width: 640px) {
+  header.site .bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero {
+    padding-top: 2.75rem;
+  }
+}
