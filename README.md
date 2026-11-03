@@ -7,7 +7,7 @@ Static site for [iteration18.com](https://iteration18.com): company page and hos
 - `/` — company homepage
 - `/privacy.html` — index of privacy documents
 - `/apps/syntegra-rp/privacy.html` — Syntegra RP privacy policy (Play Store URL)
-- `/apps/videonut/privacy.html` — VideoNut privacy policy (Play Store URL)
+- `/apps/videonut/privacy.html` — Pass The Popcorn privacy policy (Play Store URL)
 
 ## Hosting
 
