@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Your account — Iteration 18</title>
+    <meta
+      name="description"
+      content="Finishes email links for Nutshell and Pass The Popcorn accounts."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <link rel="stylesheet" href="../css/site.css" />
+  </head>
+  <body>
+    <nav class="navbar sticky-top border-bottom">
+      <div class="container">
+        <a class="navbar-brand" href="../index.html">Iteration<span>18</span></a>
+      </div>
+    </nav>
+
+    <main class="legal">
+      <div class="wrap" style="max-width: 28rem">
+        <noscript>
+          <h1>Your account</h1>
+          <p>This page needs JavaScript to finish the link from your email.</p>
+        </noscript>
+
+        <!-- Set a new password from a reset email. -->
+        <section id="view-reset" hidden>
+          <h1>Choose a new password</h1>
+          <p class="meta">For your Nutshell or Pass The Popcorn account.</p>
+          <form id="reset-form" novalidate>
+            <div class="mb-3">
+              <label class="form-label" for="password">New password</label>
+              <input class="form-control" type="password" id="password" autocomplete="new-password" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="password-again">New password again</label>
+              <input class="form-control" type="password" id="password-again" autocomplete="new-password" required />
+            </div>
+            <p class="text-danger" id="reset-error" role="alert" hidden></p>
+            <button class="btn btn-primary w-100" type="submit" id="reset-button">Change password</button>
+          </form>
+        </section>
+
+        <!-- Confirm an address from a confirmation email that carries a link. -->
+        <section id="view-confirm" hidden>
+          <h1>Confirm your email</h1>
+          <p class="meta">For your Nutshell or Pass The Popcorn account.</p>
+          <p class="text-danger" id="confirm-error" role="alert" hidden></p>
+          <button class="btn btn-primary w-100" type="button" id="confirm-button">Confirm my email</button>
+        </section>
+
+        <section id="view-message" hidden>
+          <h1 id="message-title"></h1>
+          <p id="message-body"></p>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site py-4">
+      <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 small">
+          <span>&copy; 2026 Iteration18 Software Solutions Inc., Saint John, NB</span>
+          <span class="d-flex gap-3">
+            <a href="../index.html">Home</a>
+            <a href="../privacy.html">Privacy</a>
+            <a href="mailto:steve@iteration18.com">steve@iteration18.com</a>
+          </span>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // The project URL and its public (anon) key, the same pair the apps ship with.
+      const AUTH_URL = "https://rumalbbbmcvoamurvkkl.supabase.co/auth/v1";
+      const PUBLIC_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1bWFsYmJibWN2b2FtdXJ2a2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5MDA1MDUsImV4cCI6MjA3NzQ3NjUwNX0.RkcARmRhlHWSbl0sp0L-ERqRF1_DoZfpwZMOvU4zEqw";
+
+      const query = new URLSearchParams(location.search);
+      const fragment = new URLSearchParams(location.hash.replace(/^#/, ""));
+      const param = (name) => query.get(name) || fragment.get(name);
+
+      const tokenHash = param("token_hash");
+      const type = param("type");
+      const linkError = param("error_description") || param("error");
+      const arrivedSignedIn = Boolean(param("code") || param("access_token"));
+
+      // The token is single-use; keep it out of the address bar and history.
+      history.replaceState(null, "", location.pathname);
+
+      const USED_LINK =
+        "This link has expired or was already used. Open the app and ask for a new one.";
+
+      function show(id) {
+        for (const view of document.querySelectorAll("main section")) {
+          view.hidden = view.id !== id;
+        }
+      }
+
+      function showMessage(title, body) {
+        document.getElementById("message-title").textContent = title;
+        document.getElementById("message-body").textContent = body;
+        show("view-message");
+      }
+
+      function showError(id, text) {
+        const line = document.getElementById(id);
+        line.textContent = text;
+        line.hidden = false;
+      }
+
+      async function call(path, method, body, accessToken) {
+        const response = await fetch(AUTH_URL + path, {
+          method,
+          headers: {
+            apikey: PUBLIC_KEY,
+            Authorization: "Bearer " + (accessToken || PUBLIC_KEY),
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const error = new Error(
+            data.msg || data.error_description || data.message || "Something went wrong. Try again."
+          );
+          error.code = data.error_code || data.code;
+          throw error;
+        }
+        return data;
+      }
+
+      // Exchanges the emailed token once. A second attempt (after a rejected
+      // password, say) reuses the session instead of the spent token.
+      let session = null;
+      async function redeem() {
+        if (!session) {
+          try {
+            session = await call("/verify", "POST", { type, token_hash: tokenHash });
+          } catch (error) {
+            throw new Error(USED_LINK);
+          }
+        }
+        return session;
+      }
+
+      document.getElementById("reset-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const password = document.getElementById("password").value;
+        const again = document.getElementById("password-again").value;
+        const button = document.getElementById("reset-button");
+        document.getElementById("reset-error").hidden = true;
+        if (!password) return showError("reset-error", "Type a new password.");
+        if (password !== again) return showError("reset-error", "The two passwords do not match.");
+        button.disabled = true;
+        try {
+          const { access_token } = await redeem();
+          await call("/user", "PUT", { password }, access_token);
+          showMessage(
+            "Password changed",
+            "Open Nutshell or Pass The Popcorn and sign in with your new password."
+          );
+        } catch (error) {
+          showError("reset-error", error.message);
+          button.disabled = false;
+        }
+      });
+
+      document.getElementById("confirm-button").addEventListener("click", async (event) => {
+        event.target.disabled = true;
+        document.getElementById("confirm-error").hidden = true;
+        try {
+          await redeem();
+          showMessage("Email confirmed", "Open Nutshell or Pass The Popcorn and sign in.");
+        } catch (error) {
+          showError("confirm-error", error.message);
+        }
+      });
+
+      if (linkError) {
+        showMessage("That link did not work", USED_LINK);
+      } else if (tokenHash && type === "recovery") {
+        show("view-reset");
+        document.getElementById("password").focus();
+      } else if (tokenHash && (type === "signup" || type === "email")) {
+        show("view-confirm");
+      } else if (arrivedSignedIn) {
+        showMessage(
+          "You can go back to the app",
+          "If you were confirming your email, it is confirmed: open Nutshell or Pass The Popcorn and sign in. " +
+            "If you were resetting your password, ask for a new reset email from the app and use that link."
+        );
+      } else {
+        showMessage(
+          "Nothing to finish here",
+          "This page completes the links in emails from Nutshell and Pass The Popcorn. Open the link from your email again, or go back to the app."
+        );
+      }
+    </script>
+  </body>
+</html>
